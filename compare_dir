@@ -1,0 +1,37 @@
+#! /bin/bash
+
+
+#Name: compare_dir
+#function: takes 2 directories as input and counts the files or subdirectories in them and shows which has the most files.
+#Author: Alexander Chen
+
+
+# checking if there are exactly 2 arguments.
+if [ ! $1 ] || [ ! $2 ]
+then echo "We did not detect 2 arguments";exit 1
+else echo "The number of arguments are correct"
+fi
+
+#making variables of the arguments
+directory_one=$1
+directory_two=$2
+
+#checking of they are BOTH valid directories
+if [ -d $1 ] && [ -d $2 ]
+then echo "the given arguments are valid directories: 
+$directory_one 
+$directory_two"
+else echo "but they are not valid directories"
+fi
+
+#counting the files/sub-directories in the directory
+count_one=$(ls -l $directory_one | wc -l)
+count_two=$(ls -l $directory_two | wc -l)
+
+#comparing the two variables and outputting the correct response.
+if [ $count_one -gt $count_two ]
+then echo "$directory_one has the highest number of files or subdirectories, namely $count_one "
+elif [ $count_one -eq $count_two ]
+then echo "both $directory_one and $directory_two are equal in length, namely $count_one"
+else echo "$directory_two has the highest number of files or subdirectories, namely $count_two"
+fi 
