@@ -1,12 +1,14 @@
 #! /bin/bash
 
 #Name: make_directories
-#Function: takes 3 arguments. first is a valid path name where the parent and child directories are made. Second is the number of parent directories that need to be made, third is 
-#number of child directories need to be made 
+
+#Function: takes 5 arguments. (1) path where the directories are made, (2) Name of the parent directory, (3) amount of parent directories to be made, (4) name of the child directory,
+# (5) amount of child directories to be made.
+
 #Author: Alexander Chen
 
 
-#The nummeric and of the ranges
+#The nummeric end of the ranges
 end_parent=$3
 end_child=$5
 
@@ -22,35 +24,35 @@ num_children=$(seq 1 $end_child)
 #checking if the first argument is a valid path
 if [ -d $1 ] 
 then echo "path: $1 is valid and will be used" 
-else echo "but they are not valid directories"
+else echo "path: $1 is NOT a valid path"
 fi
 
 #checking if the third argument is a numbers greater than or equal to 1
 if [ $3 -ge 1 ]
-then echo "this is a correct input"
+then echo "$3 parent directories is valid"
 else echo  "this number should be bigger or equal to 1" ; exit 1
 fi
 
 #checking if the fourth argument (child subdirectories) is greater than or equal to 1
 if [ $5 -ge 1 ]
-then echo "this is a correct input"
+then echo "$5 child directories is valid"
 else echo  "this number should be bigger or equal to 1" ; exit 1
 fi
 
 
 #making sure argument 2 and 3 are string arguments
 if [ -n $2 ] && [ -n $4 ]
-then echo "both naming arguments are longer than zero"
+then echo "parent:$2 and child:$4"
 else echo "a naming argument is shorter than zero"; exit 1
 fi
 
-#making variable of the argument
+#making a variable out of the first argument
 parent_dir=$1
+
 #moving in the designated path
 cd $parent_dir
 
-#Two for loops, the first makes the parent directories and the second makes the 
-#child directories.
+#Two for-loops, the first makes the parent directories and the second makes the child directories.
 for i in $num_parents
 do 
 mkdir "$name_parent""$i"
@@ -59,7 +61,7 @@ mkdir "$name_parent""$i"
   mkdir "$parent_dir/"$name_parent""$i"/"$name_child""$j""
   done
 done 
-
+echo "The directories have been added succesfully"
 
 
 
