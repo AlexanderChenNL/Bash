@@ -1,0 +1,46 @@
+#! /bin/bash
+
+#name: data_cleaning_and_formatting
+
+#function: scrubs data specific to Quandl bitcoin data, while copying/preserving the raw data and making the cleaned data suitable to MYSQL import.
+#it takes 1 argument which is the PATH where the downloads are located and does all the formating in that PATH.
+#it outputs the newly cleaned files and stores the raw files for the future.
+
+#author: Alexander Chen
+
+
+#learning_objective: for-loops | file-managment | AWK language | fundamental data cleaning
+
+
+path_name=$1
+
+#Checks if a raw directory has been made
+if [ ! -d "$path_name"/raw ]
+then echo "directory raw not detected, so it will be made";  mkdir "$path_name"/raw
+else echo "directory raw will be used to store the raw data files"
+fi
+
+#refocuse attention to the correct directory path_name
+cd "$path_name"
+
+#concerning all files with this directory
+for j in *.csv
+  do 
+  #preserve the raw file in a designated directory "raw"
+  cp $j "$path_name"/raw
+  #extracting the future file name
+  tail -n 1 $j > last_line.txt
+  file_name=$(awk -F , '{ print $1 }' last_line.txt)
+  file_ID="${file_name}.csv"
+  #making the file with the new name
+  touch "${file_ID}"
+  #deleting the last two columns of the downloaded data and transferring the content
+  cat $j | cut -d, -f-6 > "${file_ID}"
+  #removing the old data
+  rm -r $j
+  #notification message to user
+  echo "The data has been cleaned and renamed from "${j}" to "${file_ID}""
+done
+
+#removing the last_line.txt to keep the directory clean.
+rm -r last_line.txt
