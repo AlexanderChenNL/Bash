@@ -1,0 +1,75 @@
+#!/bin/bash
+
+#Author: Alexander Chen
+#title: Adding .csv files to a specific database
+
+#learning objectives: mysql from bash | case statements | information_schema | mysqlimport
+
+#check for valid path in argument 1.
+if [ $# -gt 0 ] && [ -d $1 ] 
+then echo "valid directory given as argument" 
+else echo "this is not a valid directory, please restart"; exit 1
+fi
+
+#store all the databases currently available to the user (could be root).
+list_db=$(mysql -se  "show databases")
+
+#select the prefered database.
+select db_choice in $list_db
+do
+      export $db_choice; echo "you have chosen the database: '${db_choice}'";break
+done
+
+
+#store the tables of the chosen database.
+list_tables=$(mysql "$db_choice" -se "show tables")
+
+#select the correct table.
+select table_choice in $list_tables
+do
+      export $table_choice; echo "you have choosen the table:'${table_choice}'";
+      #getting the fieldnames only from the chosen table
+      list_fields=$(mysql -se "select column_name from information_schema.columns where 
+      table_schema = '"${db_choice}"' and table_name = '"${table_choice}"'");
+      number_table=$(wc -w <<<$list_fields)
+      break
+done
+
+
+#to get the header numbers of the first file of the .csv directory.
+IFS=","
+cd $1
+first_file=$(ls | head -n 1)
+first_line=$(head -n 1 $first_file)
+export num_header_columns=$(wc -w <<< $first_line)
+IFS=" "
+
+#checking if there is an extra column for the primary key, this effects the latter code.
+read -n1 -p "Does the table have a seperate column as 'primary key'? [y/n]" answer
+case $answer in
+  y|Y) export num_header_columns=$((num_header_columns+1)) ;;
+  n|N) export num_header_columns=$((num_header_columns+0)) ;;
+esac
+
+echo "			"
+
+
+
+#checking if the .csv columns and table columns line up.
+if [ $number_table -eq $num_header_columns ]
+then echo "The number of columns in the chosen table matches the number of columns in the .csv file"
+else echo "The number of columns between .csv file and table do NOT match, please recheck your choosen table"; exit 1
+fi
+
+
+
+cd $1
+#make a temp file to import .csv, in order for mysqlimport to work properly.
+for j in *.csv
+do
+cp $j  "${table_choice}.csv"
+mysqlimport --ignore-lines=1 --fields-terminated-by=, --verbose --local $db_choice "${1}/${table_choice}.csv" &> /dev/null
+echo "succesfully uploaded file ${j} in table: ${table_choice}"
+done
+#cleaning up the needed file for cleanliness.
+rm "${table_choice}.csv"
